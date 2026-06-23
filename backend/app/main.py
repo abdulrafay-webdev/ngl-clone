@@ -4,15 +4,22 @@ from sqlmodel import Session, select
 from typing import List
 import os
 from dotenv import load_dotenv
+from contextlib import asynccontextmanager
 
-from database import get_session, create_db_and_tables
-from models import Message, MessageCreate, MessageRead
+from app.database import get_session, create_db_and_tables
+from app.models import Message, MessageCreate, MessageRead
 
 load_dotenv()
 
 ADMIN_SECRET = os.getenv("ADMIN_SECRET", "Rafay@2005")
 
-app = FastAPI(title="Anonymous Messaging API")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Initialize DB tables on startup
+    create_db_and_tables()
+    yield
+
+app = FastAPI(title="Anonymous Messaging API", lifespan=lifespan)
 
 # Configure CORS
 app.add_middleware(
@@ -22,10 +29,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-@app.on_event("startup")
-def on_startup():
-    create_db_and_tables()
 
 async def verify_admin(authorization: str = Header(None)):
     if authorization != f"Bearer {ADMIN_SECRET}":
@@ -60,4 +63,4 @@ def delete_message(message_id: str, session: Session = Depends(get_session), aut
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
