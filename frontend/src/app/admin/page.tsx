@@ -19,7 +19,8 @@ export default function AdminPage() {
   const fetchMessages = async (token: string) => {
     setLoading(true);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const apiUrl = rawApiUrl.replace(/\/$/, "");
       const response = await fetch(`${apiUrl}/api/messages`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -62,7 +63,8 @@ export default function AdminPage() {
     if (!confirm("Are you sure you want to delete this message?")) return;
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const apiUrl = rawApiUrl.replace(/\/$/, "");
       const response = await fetch(`${apiUrl}/api/messages/${id}`, {
         method: "DELETE",
         headers: {

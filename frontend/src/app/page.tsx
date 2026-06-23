@@ -12,7 +12,8 @@ export default function Home() {
     setStatus("sending");
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const apiUrl = rawApiUrl.replace(/\/$/, "");
       const response = await fetch(`${apiUrl}/api/messages`, {
         method: "POST",
         headers: {
